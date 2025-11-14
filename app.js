@@ -175,6 +175,32 @@ function initializeEventListeners() {
             });
         }
     }
+    
+    const headerMenuToggle = document.getElementById('headerMenuToggle');
+    const headerActions = document.getElementById('headerActions');
+    if (headerMenuToggle && headerActions) {
+        const closeMenu = () => {
+            headerActions.classList.remove('open');
+            headerMenuToggle.setAttribute('aria-expanded', 'false');
+        };
+        
+        headerMenuToggle.addEventListener('click', () => {
+            const isOpen = headerActions.classList.toggle('open');
+            headerMenuToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+        
+        headerActions.addEventListener('click', (event) => {
+            if (event.target.closest('.btn-text') && headerActions.classList.contains('open')) {
+                closeMenu();
+            }
+        });
+        
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 640 && headerActions.classList.contains('open')) {
+                closeMenu();
+            }
+        });
+    }
 }
 
 function handleZoom(e) {
@@ -718,6 +744,7 @@ function startCeremony() {
         
         if (ceremonyButton) {
             ceremonyButton.classList.remove('is-active');
+            ceremonyButton.blur();
         }
         
         return;
@@ -2453,23 +2480,33 @@ function downloadArchiveThumbnail(imageDataUrl, timestamp) {
             return;
         }
         
-        const triggerDownload = (dataUrl) => {
+        const triggerDownload = (source, isBlob = false) => {
             const date = new Date(timestamp);
             const filename = `altar-${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}-${String(date.getHours()).padStart(2, '0')}${String(date.getMinutes()).padStart(2, '0')}.png`;
             
             const link = document.createElement('a');
-            link.href = dataUrl;
+            if (isBlob) {
+                const blobUrl = URL.createObjectURL(source);
+                link.href = blobUrl;
+                link.dataset.blobUrl = blobUrl;
+            } else {
+                link.href = source;
+            }
             link.download = filename;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            
+            if (link.dataset.blobUrl) {
+                URL.revokeObjectURL(link.dataset.blobUrl);
+            }
         };
         
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.onload = () => {
             try {
-                const scaleFactor = 8;
+                const scaleFactor = 4;
                 const baseWidth = Math.max(1, img.width);
                 const baseHeight = Math.max(1, img.height);
                 const targetWidth = baseWidth * scaleFactor;
@@ -2483,8 +2520,14 @@ function downloadArchiveThumbnail(imageDataUrl, timestamp) {
                 ctx.imageSmoothingQuality = 'high';
                 ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
                 
-                const scaledDataUrl = canvas.toDataURL('image/png');
-                triggerDownload(scaledDataUrl);
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        triggerDownload(blob, true);
+                    } else {
+                        console.warn('Canvas toBlob returned null, downloading original thumbnail.');
+                        triggerDownload(imageDataUrl);
+                    }
+                }, 'image/png', 0.95);
             } catch (scaleError) {
                 console.error('Image upscale failed, downloading original thumbnail:', scaleError);
                 triggerDownload(imageDataUrl);
