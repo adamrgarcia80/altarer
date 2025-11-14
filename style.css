@@ -20,7 +20,7 @@ body {
 }
 
 .header {
-    padding: 20px 20px 20px 20px;
+    padding: 40px 40px 20px 40px;
     background-color: #000000;
     display: flex;
     justify-content: space-between;
@@ -149,7 +149,7 @@ body {
 }
 
 .controls {
-    padding: 0px 20px 20px 20px;
+    padding: 0px 40px 40px 40px;
     display: flex;
     gap: 8px;
     background-color: #000000;
@@ -570,21 +570,19 @@ body {
     .header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 6px;
-        padding: 8px 12px;
+        gap: 8px;
+        padding: 15px;
     }
     
     .header-actions {
         position: absolute;
-        top: calc(100% + 4px);
+        top: calc(100% + 6px);
         left: 0;
         right: 0;
         background-color: #000000;
-        border-top: 1px solid #2a2a2a;
-        border-bottom: 1px solid #2a2a2a;
-        padding: 12px;
+        padding: 15px;
         flex-direction: column;
-        gap: 8px;
+        gap: 10px;
         display: none;
         z-index: 1500;
     }
@@ -605,14 +603,14 @@ body {
     }
     
     .controls {
-        padding: 8px 12px 14px;
-        gap: 4px;
-        row-gap: 4px;
+        padding: 12px 15px 18px;
+        gap: 6px;
+        row-gap: 6px;
     }
     
     .btn {
-        font-size: 10px;
-        height: 22px;
-        padding: 6px 14px;
+        font-size: 10.4px;
+        height: 24px;
+        padding: 7px 16px;
     }
 }
