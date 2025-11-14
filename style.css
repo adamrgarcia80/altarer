@@ -20,7 +20,7 @@ body {
 }
 
 .header {
-    padding: 15px 40px 15px 40px;
+    padding: 12px 32px 12px 32px;
     background-color: #000000;
     display: flex;
     justify-content: space-between;
@@ -56,7 +56,7 @@ body {
 
 .header-actions {
     display: flex;
-    gap: 20px;
+    gap: 18px;
     align-items: center;
 }
 
@@ -66,10 +66,12 @@ body {
     border: none;
     color: #d0d0d0;
     font-family: 'andale mono', monospace;
-    font-size: 12px;
+    font-size: 18px;
     letter-spacing: 1px;
     text-transform: uppercase;
     cursor: pointer;
+    line-height: 1;
+    padding: 0;
 }
 
 .header-menu-toggle:hover {
@@ -568,21 +570,21 @@ body {
     .header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 10px;
-        padding: 12px 16px;
+        gap: 6px;
+        padding: 8px 12px;
     }
     
     .header-actions {
         position: absolute;
-        top: calc(100% + 6px);
+        top: calc(100% + 4px);
         left: 0;
         right: 0;
         background-color: #000000;
         border-top: 1px solid #2a2a2a;
         border-bottom: 1px solid #2a2a2a;
-        padding: 16px;
+        padding: 12px;
         flex-direction: column;
-        gap: 12px;
+        gap: 8px;
         display: none;
         z-index: 1500;
     }
@@ -593,17 +595,19 @@ body {
     
     .header-menu-toggle {
         display: inline-block;
+        width: 100%;
+        text-align: left;
     }
     
     .controls {
-        padding: 10px 20px 20px;
-        gap: 6px;
-        row-gap: 6px;
+        padding: 8px 12px 14px;
+        gap: 4px;
+        row-gap: 4px;
     }
     
     .btn {
-        font-size: 10.8px;
-        height: 25px;
-        padding: 7px 18px;
+        font-size: 10px;
+        height: 22px;
+        padding: 6px 14px;
     }
 }
