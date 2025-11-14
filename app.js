@@ -160,6 +160,15 @@ function initializeEventListeners() {
             applyTransform();
         }
     });
+    
+    const infoToggle = document.getElementById('infoToggle');
+    const infoPanel = document.getElementById('infoPanel');
+    if (infoToggle && infoPanel) {
+        infoToggle.addEventListener('click', () => {
+            const isOpen = infoPanel.classList.toggle('open');
+            infoToggle.textContent = isOpen ? 'CLOSE INFO  /' : 'INFO  /';
+        });
+    }
 }
 
 function handleZoom(e) {
@@ -922,6 +931,110 @@ async function fetchOpenverseMedia(subject = null, options = {}) {
     return null;
 }
 
+async function fetchLibraryOfCongressMedia(subject = null) {
+    const queries = subject
+        ? [subject, `${subject} artifact`, `${subject} illustration`]
+        : ['ritual object', 'museum artifact', 'mythic figure'];
+    const shuffledQueries = shuffleArray(queries);
+    
+    for (const query of shuffledQueries) {
+        try {
+            const url = `https://www.loc.gov/search/?q=${encodeURIComponent(query)}&fo=json&c=75&fa=online-format:image`;
+            const response = await fetch(url);
+            if (!response.ok) continue;
+            const data = await response.json();
+            if (!data.results || data.results.length === 0) continue;
+            
+            const shuffledResults = shuffleArray(data.results);
+            for (const result of shuffledResults) {
+                if (!result.image_url || result.image_url.length === 0) continue;
+                const candidateUrl = result.image_url[0];
+                if (!candidateUrl || usedImageUrls.has(candidateUrl)) continue;
+                try {
+                    const headResp = await fetch(candidateUrl, { method: 'HEAD' });
+                    if (!headResp.ok) continue;
+                    return candidateUrl;
+                } catch (e) {
+                    continue;
+                }
+            }
+        } catch (error) {
+            console.error('Library of Congress fetch error:', error);
+            continue;
+        }
+    }
+    
+    return null;
+}
+
+async function fetchNasaMedia(subject = null) {
+    const queries = subject
+        ? [subject, `${subject} space`, `${subject} nebula`]
+        : ['cosmic ritual', 'starlight', 'constellation art'];
+    const shuffledQueries = shuffleArray(queries);
+    
+    for (const query of shuffledQueries) {
+        try {
+            const apiUrl = `https://images-api.nasa.gov/search?q=${encodeURIComponent(query)}&media_type=image`;
+            const response = await fetch(apiUrl);
+            if (!response.ok) continue;
+            const data = await response.json();
+            const items = data?.collection?.items || [];
+            if (items.length === 0) continue;
+            
+            const shuffledItems = shuffleArray(items);
+            for (const item of shuffledItems) {
+                const link = item.links?.find(l => l.href);
+                const candidateUrl = link?.href;
+                if (!candidateUrl || usedImageUrls.has(candidateUrl)) continue;
+                try {
+                    const headResp = await fetch(candidateUrl, { method: 'HEAD' });
+                    if (!headResp.ok) continue;
+                    return candidateUrl;
+                } catch (e) {
+                    continue;
+                }
+            }
+        } catch (error) {
+            console.error('NASA media fetch error:', error);
+            continue;
+        }
+    }
+    
+    return null;
+}
+
+async function fetchInternetArchiveMedia(subject = null) {
+    const query = subject ? `${subject}` : 'ritual';
+    try {
+        const apiUrl = `https://archive.org/advancedsearch.php?q=mediatype:(image)+AND+(${encodeURIComponent(query)})&fl[]=identifier&output=json&rows=60`;
+        const response = await fetch(apiUrl);
+        if (!response.ok) return null;
+        const data = await response.json();
+        const docs = data?.response?.docs || [];
+        if (docs.length === 0) return null;
+        
+        const shuffledDocs = shuffleArray(docs);
+        for (const doc of shuffledDocs) {
+            const identifier = doc.identifier;
+            if (!identifier) continue;
+            const candidateUrl = `https://archive.org/services/img/${identifier}`;
+            if (usedImageUrls.has(candidateUrl)) continue;
+            try {
+                const headResp = await fetch(candidateUrl, { method: 'HEAD' });
+                if (!headResp.ok) continue;
+                return candidateUrl;
+            } catch (e) {
+                continue;
+            }
+        }
+    } catch (error) {
+        console.error('Internet Archive fetch error:', error);
+    }
+    
+    return null;
+}
+
 async function fetchWikipediaCommonsImage(subject = null) {
     // If subject is specified, search for that specific subject
     if (subject) {
@@ -1075,6 +1188,16 @@ async function fetchWikipediaCommonsImage(subject = null) {
         }
     }
     
+    // Try Library of Congress
+    try {
+        const locImage = await fetchLibraryOfCongressMedia(subject);
+        if (locImage) {
+            return locImage;
+        }
+    } catch (error) {
+        console.error('Library of Congress fallback error:', error);
+    }
+    
     // Try Openverse still imagery
     try {
         const openverseImage = await fetchOpenverseMedia(subject);
@@ -1093,6 +1216,26 @@ async function fetchWikipediaCommonsImage(subject = null) {
         }
     } catch (error) {
         console.error('Openverse gif fetch error:', error);
+    }
+    
+    // Try NASA imagery
+    try {
+        const nasaImage = await fetchNasaMedia(subject);
+        if (nasaImage) {
+            return nasaImage;
+        }
+    } catch (error) {
+        console.error('NASA fallback error:', error);
+    }
+    
+    // Try Internet Archive imagery
+    try {
+        const archiveImage = await fetchInternetArchiveMedia(subject);
+        if (archiveImage) {
+            return archiveImage;
+        }
+    } catch (error) {
+        console.error('Internet Archive fallback error:', error);
     }
     
     // Fallback: use alternative image source
@@ -2311,7 +2454,7 @@ function downloadArchiveThumbnail(imageDataUrl, timestamp) {
         img.crossOrigin = 'anonymous';
         img.onload = () => {
             try {
-                const scaleFactor = 4;
+                const scaleFactor = 8;
                 const baseWidth = Math.max(1, img.width);
                 const baseHeight = Math.max(1, img.height);
                 const targetWidth = baseWidth * scaleFactor;
@@ -2442,8 +2585,8 @@ async function exportArchiveAltar(altar) {
     const mantraText = generateMantra();
     
     // Create export
-    const width = 1080;
-    const height = 1080;
+    const width = 2160;
+    const height = 2160;
     
     try {
         const canvas = await createStaticExportWithMantra(width, height, mantraText);
@@ -2608,8 +2751,8 @@ async function exportAltar(format) {
     }
     
     // Always use square format
-    const width = 1080;
-    const height = 1080;
+    const width = 2160;
+    const height = 2160;
     
     try {
         // Generate single mantra
@@ -2785,7 +2928,8 @@ async function createStaticExportWithMantra(width, height, mantraText) {
     
     // Draw mantra text overlay (single line, uppercase, large)
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'normal 112px Helvetica, Arial, sans-serif'; // Twice as large as display (56px * 2)
+    const mantraFontSize = Math.max(80, Math.round(height * 0.104));
+    ctx.font = `normal ${mantraFontSize}px Helvetica, Arial, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.globalCompositeOperation = 'difference'; // Difference blend mode
