@@ -599,6 +599,11 @@ body {
         text-align: left;
     }
     
+    .header-actions .btn-text {
+        width: 100%;
+        text-align: left;
+    }
+    
     .controls {
         padding: 8px 12px 14px;
         gap: 4px;
