@@ -163,11 +163,17 @@ function initializeEventListeners() {
     
     const infoToggle = document.getElementById('infoToggle');
     const infoPanel = document.getElementById('infoPanel');
+    const infoClose = document.getElementById('infoClose');
     if (infoToggle && infoPanel) {
         infoToggle.addEventListener('click', () => {
-            const isOpen = infoPanel.classList.toggle('open');
-            infoToggle.textContent = isOpen ? 'CLOSE INFO  /' : 'INFO  /';
+            infoPanel.classList.toggle('open');
         });
+        
+        if (infoClose) {
+            infoClose.addEventListener('click', () => {
+                infoPanel.classList.remove('open');
+            });
+        }
     }
 }
 
@@ -665,6 +671,7 @@ let imageFlash = null; // Image flash overlay element
 let lastLightningTime = 0; // Track last lightning flash
 
 function startCeremony() {
+    const ceremonyButton = document.getElementById('ceremony');
     if (ceremonyActive) {
         // Stop ceremony
         ceremonyActive = false;
@@ -707,6 +714,10 @@ function startCeremony() {
         if (gridOverlay) {
             gridOverlay.style.transition = 'opacity 3s ease';
             gridOverlay.style.opacity = '1';
+        }
+        
+        if (ceremonyButton) {
+            ceremonyButton.classList.remove('is-active');
         }
         
         return;
@@ -756,6 +767,10 @@ function startCeremony() {
     if (gridOverlay) {
         gridOverlay.style.transition = 'opacity 3s ease';
         gridOverlay.style.opacity = '0';
+    }
+    
+    if (ceremonyButton) {
+        ceremonyButton.classList.add('is-active');
     }
     
     // Arrange pieces in a circle initially - more distance between them
@@ -2373,7 +2388,7 @@ function saveAltarToArchive() {
                 useCORS: true,
                 logging: false,
                 allowTaint: true,
-                scale: 0.35,
+                scale: Math.max(2, window.devicePixelRatio || 1),
                 imageTimeout: 5000,
                 ignoreElements: (element) => element.classList && element.classList.contains('grid-overlay'),
                 onclone: (clonedDoc) => {
