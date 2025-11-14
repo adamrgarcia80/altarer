@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A+L+T+A+R+E+R</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-top">
+                <h1 class="title">ALTARER</h1>
+                
+            </div>
+            <div class="header-actions">
+                <button id="clearCanvas" class="btn-text">CLEAR  /</button>
+                <button id="saveAltar" class="btn-text">SAVE ALTAR  /</button>
+                <button id="viewArchive" class="btn-text">ARCHIVE</button>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="createAltar" class="btn">CREATE ALTAR</button>
+            <button id="rearrange" class="btn">REARRANGE</button>
+            <button id="gridAssemble" class="btn">GRID</button>
+            <button id="mantra" class="btn">MANTRA</button>
+            <button id="ceremony" class="btn">CEREMONY</button>
+            <button id="random" class="btn">RANDOM</button>
+            <button id="addBell" class="btn">BELL</button>
+            <button id="addPedestal" class="btn">PEDESTAL</button>
+            <button id="addFlowers" class="btn">FLOWERS</button>
+            <button id="addSmoke" class="btn">SMOKE</button>
+            <button id="addFlame" class="btn">FLAME</button>
+            <button id="addBones" class="btn">BONES</button>
+            <button id="addFeathers" class="btn">FEATHERS</button>
+            <button id="addTrinket" class="btn">TRINKET</button>
+            <button id="addSymbol" class="btn">SYMBOL</button>
+            <button id="addBook" class="btn">BOOK</button>
+        </div>
+        
+        <div class="canvas-container" id="canvas">
+            <div class="grid-overlay"></div>
+        </div>
+        
+        <div id="archiveModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>ARCHIVE</h2>
+                <div id="archiveList" class="archive-list"></div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

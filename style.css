@@ -1,0 +1,487 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Courier New', monospace;
+    background-color: #0a0a0a;
+    color: #d0d0d0;
+    overflow: hidden;
+    height: 100vh;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.header {
+    padding: 15px 40px 15px 40px;
+    background-color: #000000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-top {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+}
+
+.title {
+    font-size: 12px;
+    letter-spacing: 1px;
+    font-weight: normal;
+    font-family: 'Courier New', monospace;
+    color: #d0d0d0;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.subtitle {
+    font-size: 12px;
+    letter-spacing: 1px;
+    font-weight: normal;
+    font-family: 'Courier New', monospace;
+    color: #d0d0d0;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.btn-text {
+    background-color: transparent;
+    border: none;
+    color: #d0d0d0;
+    padding: 0;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-text:hover {
+    color: #ffffff;
+}
+
+.controls {
+    padding: 15px 40px 45px 40px;
+    display: flex;
+    gap: 8px;
+    background-color: #000000;
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 8px;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.btn {
+    background-color: transparent;
+    border: 1px solid #4a4a4a;
+    color: #d0d0d0;
+    padding: 8px 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    height: 28px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-subject {
+    background-color: transparent;
+    border: 1px solid #4a4a4a;
+    color: #d0d0d0;
+    padding: 8px 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-subject:hover {
+    border-color: #d0d0d0;
+    background-color: #d0d0d0;
+    color: #0a0a0a;
+}
+
+.btn:hover {
+    border-color: #d0d0d0;
+    background-color: #d0d0d0;
+    color: #0a0a0a;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.canvas-container {
+    flex: 1;
+    position: relative;
+    background-color: #000000;
+    overflow: hidden;
+    cursor: grab;
+    perspective: 1000px;
+    perspective-origin: center center;
+}
+
+.mantra-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Helvetica', 'Helvetica Neue', Arial, sans-serif;
+    font-size: clamp(48px, 6.5vw, 96px);
+    font-weight: normal;
+    color: #ffffff;
+    text-align: center;
+    white-space: normal;
+    line-height: .9;
+    pointer-events: none;
+    z-index: 10000;
+    max-width: 85%;
+    mix-blend-mode: difference;
+    word-wrap: break-word;
+}
+
+.grid-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+    background-size: 30px 30px;
+    pointer-events: none;
+    z-index: 1;
+    /* Grid stays fixed, doesn't transform */
+    transform: none !important;
+    transition: opacity 3s ease;
+    opacity: 1;
+}
+
+#canvas-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+}
+
+.altar-piece {
+    position: absolute;
+    border: none;
+    background: transparent;
+    cursor: move;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+    min-height: 80px;
+    /* Ensure transparent PNGs display correctly */
+    overflow: visible;
+}
+
+.altar-piece.selected {
+    outline: 1px solid #ffffff;
+    outline-offset: 0;
+    box-shadow: none;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+.altar-piece img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* Full color, no filters */
+    filter: contrast(1.1);
+    opacity: 1;
+    /* Images processed will have transparent backgrounds as masked PNGs */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    /* Ensure transparent backgrounds are preserved */
+    background: transparent;
+    display: block;
+}
+
+/* Resize handles */
+.resize-handle {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-color: #ffffff;
+    border: 1px solid #ffffff;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 20;
+    cursor: nw-resize;
+}
+
+.altar-piece.selected .resize-handle {
+    opacity: 1;
+}
+
+.resize-handle:hover {
+    background-color: #ffffff;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+}
+
+.resize-nw {
+    top: -6px;
+    left: -6px;
+    cursor: nw-resize;
+}
+
+.resize-ne {
+    top: -6px;
+    right: -6px;
+    cursor: ne-resize;
+}
+
+.resize-sw {
+    bottom: -6px;
+    left: -6px;
+    cursor: sw-resize;
+}
+
+.resize-se {
+    bottom: -6px;
+    right: -6px;
+    cursor: se-resize;
+}
+
+.snap-indicator {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: #6a6a6a;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+}
+
+.modal-content {
+    background-color: #0f0f0f;
+    margin: 5% auto;
+    padding: 40px;
+    border: 1px solid #2a2a2a;
+    width: 80%;
+    max-width: 900px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.close {
+    color: #6a6a6a;
+    float: right;
+    font-size: 28px;
+    font-weight: normal;
+    cursor: pointer;
+    line-height: 20px;
+}
+
+.close:hover,
+.close-export:hover {
+    color: #d0d0d0;
+}
+
+.close-export {
+    color: #6a6a6a;
+    float: right;
+    font-size: 28px;
+    font-weight: normal;
+    cursor: pointer;
+    line-height: 20px;
+}
+
+.modal-content h2 {
+    font-size: 20px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 30px;
+    font-weight: normal;
+}
+
+.archive-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.archive-item {
+    position: relative;
+    border: 1px solid #2a2a2a;
+    padding: 15px;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+    background-color: #151515;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.archive-item:hover {
+    border-color: #4a4a4a;
+}
+
+.archive-item img {
+    max-width: 100%;
+    max-height: 150px;
+    filter: contrast(1.1);
+    opacity: 0.9;
+}
+
+.archive-item .archive-date {
+    margin-top: 10px;
+    font-size: 10px;
+    color: #6a6a6a;
+    letter-spacing: 1px;
+}
+
+.archive-download {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 1px solid #4a4a4a;
+    color: #d0d0d0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 10;
+    padding: 0;
+    font-family: 'Courier New', monospace;
+}
+
+.archive-download:hover {
+    background-color: rgba(0, 0, 0, 0.9);
+    border-color: #ffffff;
+    color: #ffffff;
+    transform: scale(1.1);
+}
+
+.btn-archive-export {
+    background-color: transparent;
+    border: 1px solid #4a4a4a;
+    color: #d0d0d0;
+    padding: 6px 16px;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.btn-archive-export:hover {
+    border-color: #6a6a6a;
+    background-color: #1a1a1a;
+    color: #f0f0f0;
+}
+
+.export-options {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin: 30px 0;
+}
+
+.export-status {
+    margin-top: 20px;
+    text-align: center;
+    color: #6a6a6a;
+    font-size: 12px;
+    letter-spacing: 1px;
+    min-height: 30px;
+}
+
+.loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #000000;
+    border: 1px solid #4a4a4a;
+    color: #d0d0d0;
+    padding: 8px 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    opacity: 1;
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #3a3a3a;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #4a4a4a;
+}
