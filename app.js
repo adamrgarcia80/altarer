@@ -226,33 +226,16 @@ function initializeEventListeners() {
                 infoPanel.classList.remove('open');
             });
         }
+        
+        infoPanel.addEventListener('click', (event) => {
+            // Allow clicking links without closing
+            if (event.target.closest('a')) {
+                return;
+            }
+            infoPanel.classList.remove('open');
+        });
     }
     
-    const headerMenuToggle = document.getElementById('headerMenuToggle');
-    const headerActions = document.getElementById('headerActions');
-    if (headerMenuToggle && headerActions) {
-        const closeMenu = () => {
-            headerActions.classList.remove('open');
-            headerMenuToggle.setAttribute('aria-expanded', 'false');
-        };
-        
-        headerMenuToggle.addEventListener('click', () => {
-            const isOpen = headerActions.classList.toggle('open');
-            headerMenuToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-        });
-        
-        headerActions.addEventListener('click', (event) => {
-            if (event.target.closest('.btn-text') && headerActions.classList.contains('open')) {
-                closeMenu();
-            }
-        });
-        
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 640 && headerActions.classList.contains('open')) {
-                closeMenu();
-            }
-        });
-    }
 }
 
 function handleZoom(e) {
