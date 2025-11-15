@@ -538,8 +538,10 @@ body {
     }
     
     .info-panel {
-        font-size: clamp(18px, 4vw, 30px);
-        padding: 100px 16px 24px;
+        font-size: clamp(16px, 3.5vw, 26px);
+        padding: 80px 20px 24px;
+        text-align: left;
+        align-items: flex-start;
     }
     
     .btn {
