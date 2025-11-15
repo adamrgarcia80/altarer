@@ -23,6 +23,58 @@ const CLICK_TIME_THRESHOLD = 200; // milliseconds to consider it a click vs drag
 const SNAP_DISTANCE = 50;
 const MIN_SIZE = 80;
 const MAX_SIZE = 800;
+const BROADER_TOPICS = [
+    'found object',
+    'household artifact',
+    'street photography',
+    'botanical detail',
+    'architecture fragment',
+    'textile pattern',
+    'industrial design',
+    'vintage illustration',
+    'folk art',
+    'mechanical device',
+    'everyday ritual',
+    'ephemera',
+];
+
+const WILDCARD_TOPICS = [
+    'abstract texture',
+    'scientific illustration',
+    'cosmic landscape',
+    'natural history specimen',
+    'microscopic image',
+    'cartography fragment',
+    'weather phenomena',
+    'art museum interior',
+    'astronomical plate',
+    'geometric study',
+];
+
+function getRandomEntry(list) {
+    return list[Math.floor(Math.random() * list.length)];
+}
+
+function chooseFetchTopic(subject) {
+    if (!subject) {
+        const roll = Math.random();
+        if (roll < 0.4) return getRandomEntry(BROADER_TOPICS);
+        if (roll < 0.7) return getRandomEntry(WILDCARD_TOPICS);
+        return null;
+    }
+    
+    const roll = Math.random();
+    if (roll < 0.5) {
+        return subject;
+    } else if (roll < 0.75) {
+        return `${subject} ${getRandomEntry(BROADER_TOPICS)}`;
+    } else if (roll < 0.9) {
+        return getRandomEntry(BROADER_TOPICS);
+    } else if (roll < 0.97) {
+        return getRandomEntry(WILDCARD_TOPICS);
+    }
+    return null;
+}
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -306,13 +358,14 @@ async function createSubjectPiece(subject) {
     document.getElementById('canvas').appendChild(loading);
     
     try {
+        const fetchTopic = chooseFetchTopic(subject);
         // Fetch a unique image (not used in current composition)
         let imageUrl = null;
         let attempts = 0;
         const maxAttempts = 10;
         
         while (!imageUrl && attempts < maxAttempts) {
-            const candidateUrl = await fetchWikipediaCommonsImage(subject);
+            const candidateUrl = await fetchWikipediaCommonsImage(fetchTopic);
             
             // Check if this image URL has already been used
             if (!usedImageUrls.has(candidateUrl)) {
@@ -335,12 +388,16 @@ async function createSubjectPiece(subject) {
         const processedImageUrl = await extractSubjectFromImage(imageUrl);
         
         // Create unique altar piece
+        const sizeMultiplier = 1.2;
+        const baseWidth = 150 + Math.random() * 100;
+        const baseHeight = 150 + Math.random() * 100;
+        
         const piece = {
             id: `piece-${Date.now()}-${pieceCounter++}`,
             x: Math.random() * (window.innerWidth - 300) + 100,
             y: Math.random() * (window.innerHeight - 400) + 100,
-            width: 150 + Math.random() * 100,
-            height: 150 + Math.random() * 100,
+            width: baseWidth * sizeMultiplier,
+            height: baseHeight * sizeMultiplier,
             imageUrl: processedImageUrl || imageUrl, // Use processed transparent PNG or fallback
             originalUrl: imageUrl, // Store original URL for tracking
             rotation: 0, // Keep at 90 degrees (no rotation)
