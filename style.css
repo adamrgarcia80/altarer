@@ -544,6 +544,10 @@ body {
         align-items: flex-start;
     }
     
+    .info-panel p {
+        max-width: 75%;
+    }
+    
     .btn {
         font-size: 10.4px;
         height: 24px;
