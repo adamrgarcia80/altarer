@@ -809,9 +809,8 @@ function addMantra() {
 let ceremonyActive = false;
 let ceremonyInterval = null;
 let ceremonyTime = 0; // Track time for smooth rotation
-let lightningFlash = null; // Lightning overlay element
 let imageFlash = null; // Image flash overlay element
-let lastLightningTime = 0; // Track last lightning flash
+let lastImageFlashTime = 0; // Track last image flash
 
 function startCeremony() {
     const ceremonyButton = document.getElementById('ceremony');
@@ -819,24 +818,34 @@ function startCeremony() {
         // Stop ceremony
         ceremonyActive = false;
         ceremonyTime = 0;
-        lastLightningTime = 0;
+        lastImageFlashTime = 0;
         if (ceremonyInterval) {
             clearInterval(ceremonyInterval);
             ceremonyInterval = null;
-        }
-        if (lightningFlash) {
-            lightningFlash.remove();
-            lightningFlash = null;
         }
         if (imageFlash) {
             imageFlash.remove();
             imageFlash = null;
         }
-        // Reset all pieces
-        altarPieces.forEach(piece => {
+        // Reset all pieces to smaller resting circle
+        const canvas = document.getElementById('canvas');
+        const canvasRect = canvas.getBoundingClientRect();
+        const centerX = canvasRect.width / 2;
+        const centerY = canvasRect.height / 2;
+        
+        altarPieces.forEach((piece, i) => {
             const pieceElement = document.getElementById(piece.id);
             if (pieceElement) {
+                const angle = (Math.PI * 2 * i) / altarPieces.length;
+                const radius = Math.min(canvasRect.width, canvasRect.height) * 0.26; // Smaller resting circle
+                const x = centerX + Math.cos(angle) * radius - piece.width / 2;
+                const y = centerY + Math.sin(angle) * radius - piece.height / 2;
+                
+                piece.x = x;
+                piece.y = y;
                 pieceElement.style.transition = 'all 2s ease';
+                pieceElement.style.left = `${x}px`;
+                pieceElement.style.top = `${y}px`;
                 pieceElement.style.transform = '';
                 pieceElement.style.filter = '';
             }
@@ -870,25 +879,12 @@ function startCeremony() {
     // Start ceremony - slow and ominous ritual
     ceremonyActive = true;
     ceremonyTime = 0;
-    lastLightningTime = 0;
+    lastImageFlashTime = 0;
     
     const canvas = document.getElementById('canvas');
     const canvasRect = canvas.getBoundingClientRect();
     const centerX = canvasRect.width / 2;
     const centerY = canvasRect.height / 2;
-    
-    // Create lightning flash overlay
-    lightningFlash = document.createElement('div');
-    lightningFlash.style.position = 'fixed';
-    lightningFlash.style.top = '0';
-    lightningFlash.style.left = '0';
-    lightningFlash.style.width = '100%';
-    lightningFlash.style.height = '100%';
-    lightningFlash.style.backgroundColor = 'rgba(255, 0, 0, 0)';
-    lightningFlash.style.pointerEvents = 'none';
-    lightningFlash.style.zIndex = '9999';
-    lightningFlash.style.transition = 'none'; // Sharp blink, no easing
-    document.body.appendChild(lightningFlash);
     
     // Create image flash overlay
     imageFlash = document.createElement('div');
@@ -917,12 +913,12 @@ function startCeremony() {
         ceremonyButton.classList.add('is-active');
     }
     
-    // Arrange pieces in a circle initially - more distance between them
+    // Arrange pieces in a circle initially - 35% smaller resting size
     altarPieces.forEach((piece, i) => {
         const pieceElement = document.getElementById(piece.id);
         if (pieceElement) {
             const angle = (Math.PI * 2 * i) / altarPieces.length;
-            const radius = Math.min(canvasRect.width, canvasRect.height) * 0.4; // Increased from 0.3 to 0.4
+            const radius = Math.min(canvasRect.width, canvasRect.height) * 0.26; // 35% smaller (0.4 * 0.65)
             const x = centerX + Math.cos(angle) * radius - piece.width / 2;
             const y = centerY + Math.sin(angle) * radius - piece.height / 2;
             
@@ -936,50 +932,39 @@ function startCeremony() {
     
     // Continuous slow, ominous animation loop
     ceremonyInterval = setInterval(() => {
-        ceremonyTime += 0.022; // 10% faster (0.02 * 1.1 = 0.022)
+        ceremonyTime += 0.035; // Speed up ceremony (was 0.022)
         
-        // Random lightning flash (red screen flicker) - occasional, like lightning, faster
-        const timeSinceLastLightning = ceremonyTime - lastLightningTime;
-        if (timeSinceLastLightning > 1.5 && Math.random() < 0.03) { // Faster: 1.5s cooldown (was 3s), 3% chance (was 2%)
-            lastLightningTime = ceremonyTime;
-            // Flash red - sharp blink, no easing, faster
-            lightningFlash.style.backgroundColor = 'rgba(255, 0, 0, 0.3)';
+        // Flash images from altar pieces - slowed down by 50%
+        const timeSinceLastImageFlash = ceremonyTime - lastImageFlashTime;
+        if (altarPieces.length > 0 && timeSinceLastImageFlash > 0.8 && Math.random() < 0.12) { // Slower: 0.8s cooldown (was 0.4s), 12% chance
+            lastImageFlashTime = ceremonyTime;
+            const randomPiece = altarPieces[Math.floor(Math.random() * altarPieces.length)];
+            imageFlash.style.backgroundImage = `url(${randomPiece.imageUrl})`;
+            imageFlash.style.display = 'block';
+            imageFlash.style.opacity = '0.8';
             setTimeout(() => {
-                if (lightningFlash) {
-                    lightningFlash.style.backgroundColor = 'rgba(255, 0, 0, 0)';
+                if (imageFlash) {
+                    imageFlash.style.opacity = '0';
+                    setTimeout(() => {
+                        if (imageFlash) {
+                            imageFlash.style.display = 'none';
+                        }
+                    }, 30);
                 }
-            }, 50); // Faster: 50ms (was 100ms)
-            
-            // Randomly flash an image from the pile - sharp blink, faster
-            if (altarPieces.length > 0 && Math.random() < 0.5) {
-                const randomPiece = altarPieces[Math.floor(Math.random() * altarPieces.length)];
-                imageFlash.style.backgroundImage = `url(${randomPiece.imageUrl})`;
-                imageFlash.style.display = 'block';
-                imageFlash.style.opacity = '0.8';
-                setTimeout(() => {
-                    if (imageFlash) {
-                        imageFlash.style.opacity = '0';
-                        setTimeout(() => {
-                            if (imageFlash) {
-                                imageFlash.style.display = 'none';
-                            }
-                        }, 50); // Faster: 50ms (was 100ms)
-                    }
-                }, 50); // Faster: 50ms (was 100ms)
-            }
+            }, 30);
         }
         
         altarPieces.forEach((piece, i) => {
             const pieceElement = document.getElementById(piece.id);
             if (pieceElement) {
-                // Calculate position on rotating circle - more distance between pieces
+                // Calculate position on rotating circle - larger during motion
                 const angle = (Math.PI * 2 * i) / altarPieces.length + ceremonyTime;
-                const radius = Math.min(canvasRect.width, canvasRect.height) * (0.35 + Math.sin(ceremonyTime * 0.5) * 0.1); // Increased base from 0.25 to 0.35
+                const radius = Math.min(canvasRect.width, canvasRect.height) * 0.55; // Larger circle during animation
                 const x = centerX + Math.cos(angle) * radius - piece.width / 2;
                 const y = centerY + Math.sin(angle) * radius - piece.height / 2;
                 
-                // Slow, subtle rotation
-                const rotation = ceremonyTime * 10 + i * 10; // Slow rotation
+                // Rotation speed kept the same
+                const rotation = ceremonyTime * 10 + i * 10;
                 // Subtle breathing scale
                 const scale = 0.95 + Math.sin(ceremonyTime * 0.3 + i) * 0.05;
                 // Ominous desaturation
@@ -1011,7 +996,7 @@ function startCeremony() {
             mantraElement.style.filter = `blur(${blurAmount}px)`;
             mantraElement.style.textShadow = `${blurX * 2}px ${blurY * 2}px ${blurAmount * 2}px rgba(255, 255, 255, 0.3)`;
         }
-    }, 100); // Update every 100ms for smooth slow animation
+    }, 50); // Update every 50ms for faster animation (was 100ms)
 }
 
 const OPENVERSE_DEFAULT_TOPICS = [
