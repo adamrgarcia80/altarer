@@ -244,13 +244,20 @@ function initializeEventListeners() {
     const objectInfoContent = document.getElementById('objectInfoContent');
     
     if (objectInfoToggle && objectInfoPanel && objectInfoContent) {
-        objectInfoToggle.addEventListener('click', () => {
-            populateObjectInfo();
-            objectInfoPanel.classList.toggle('open');
+        objectInfoToggle.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            try {
+                populateObjectInfo();
+                objectInfoPanel.classList.toggle('open');
+            } catch (error) {
+                console.error('Error opening object info panel:', error);
+            }
         });
         
         if (objectInfoClose) {
             objectInfoClose.addEventListener('click', (event) => {
+                event.preventDefault();
                 event.stopPropagation();
                 objectInfoPanel.classList.remove('open');
             });
@@ -266,6 +273,12 @@ function initializeEventListeners() {
                 return;
             }
             objectInfoPanel.classList.remove('open');
+        });
+    } else {
+        console.warn('Object info panel elements not found:', {
+            toggle: !!objectInfoToggle,
+            panel: !!objectInfoPanel,
+            content: !!objectInfoContent
         });
     }
     
