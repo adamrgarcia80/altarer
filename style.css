@@ -177,6 +177,14 @@ body {
     cursor: pointer;
     font-family: 'andale mono', monospace;
     text-transform: uppercase;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+}
+
+.object-info-panel.open .object-info-panel__close {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .object-info-panel__close:hover {

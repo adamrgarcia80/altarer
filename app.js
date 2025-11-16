@@ -250,12 +250,17 @@ function initializeEventListeners() {
         });
         
         if (objectInfoClose) {
-            objectInfoClose.addEventListener('click', () => {
+            objectInfoClose.addEventListener('click', (event) => {
+                event.stopPropagation();
                 objectInfoPanel.classList.remove('open');
             });
         }
         
         objectInfoPanel.addEventListener('click', (event) => {
+            // Don't close if clicking the close button (it has its own handler)
+            if (event.target.closest('.object-info-panel__close')) {
+                return;
+            }
             // Allow clicking links without closing
             if (event.target.closest('a')) {
                 return;
