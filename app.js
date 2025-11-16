@@ -111,18 +111,39 @@ function initializeEventListeners() {
     document.getElementById('viewArchive').addEventListener('click', openArchive);
     document.querySelector('.close').addEventListener('click', closeArchive);
     
-    // Subject-specific buttons
-    document.getElementById('random').addEventListener('click', createNewAltarPiece);
-    document.getElementById('addBell').addEventListener('click', () => createSubjectPiece('bell'));
-    document.getElementById('addPedestal').addEventListener('click', () => createSubjectPiece('pedestal'));
-    document.getElementById('addFlowers').addEventListener('click', () => createSubjectPiece('flowers'));
-    document.getElementById('addSmoke').addEventListener('click', () => createSubjectPiece('smoke'));
-    document.getElementById('addFlame').addEventListener('click', () => createSubjectPiece('flame'));
-    document.getElementById('addBones').addEventListener('click', () => createSubjectPiece('bones'));
-    document.getElementById('addFeathers').addEventListener('click', () => createSubjectPiece('feathers'));
-    document.getElementById('addTrinket').addEventListener('click', () => createSubjectPiece('trinket'));
-    document.getElementById('addSymbol').addEventListener('click', () => createSubjectPiece('symbol'));
-    document.getElementById('addBook').addEventListener('click', () => createSubjectPiece('book'));
+    // ADD OBJECT dropdown (replaces individual buttons)
+    const addObjectToggle = document.getElementById('addObjectToggle');
+    const addObjectMenu = document.getElementById('addObjectMenu');
+    const addObjectWrapper = document.querySelector('.add-object-wrapper');
+    if (addObjectToggle && addObjectMenu) {
+        addObjectToggle.addEventListener('click', (event) => {
+            event.stopPropagation();
+            addObjectMenu.classList.toggle('open');
+        });
+        
+        // Handle menu item clicks
+        const menuItems = addObjectMenu.querySelectorAll('.add-object-menu__item');
+        menuItems.forEach(item => {
+            item.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const action = item.getAttribute('data-action');
+                addObjectMenu.classList.remove('open');
+                
+                if (action === 'random') {
+                    createNewAltarPiece();
+                } else {
+                    createSubjectPiece(action);
+                }
+            });
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', (event) => {
+            if (addObjectWrapper && !addObjectWrapper.contains(event.target)) {
+                addObjectMenu.classList.remove('open');
+            }
+        });
+    }
     
     const canvas = document.getElementById('canvas');
     canvas.addEventListener('mousedown', handleCanvasMouseDown);
