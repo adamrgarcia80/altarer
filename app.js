@@ -6,6 +6,7 @@ let isDragging = false;
 let isResizing = false;
 let resizeHandle = null;
 let pieceCounter = 0;
+let objectLabelCounter = 0;
 let usedImageUrls = new Set(); // Track used image URLs to prevent duplicates
 let zoomLevel = 1;
 let panOffset = { x: 0, y: 0 };
@@ -236,6 +237,64 @@ function initializeEventListeners() {
         });
     }
     
+    // Object Info Panel
+    const objectInfoToggle = document.getElementById('objectInfoToggle');
+    const objectInfoPanel = document.getElementById('objectInfoPanel');
+    const objectInfoClose = document.getElementById('objectInfoClose');
+    const objectInfoContent = document.getElementById('objectInfoContent');
+    
+    if (objectInfoToggle && objectInfoPanel && objectInfoContent) {
+        objectInfoToggle.addEventListener('click', () => {
+            populateObjectInfo();
+            objectInfoPanel.classList.toggle('open');
+        });
+        
+        if (objectInfoClose) {
+            objectInfoClose.addEventListener('click', () => {
+                objectInfoPanel.classList.remove('open');
+            });
+        }
+        
+        objectInfoPanel.addEventListener('click', (event) => {
+            // Allow clicking links without closing
+            if (event.target.closest('a')) {
+                return;
+            }
+            objectInfoPanel.classList.remove('open');
+        });
+    }
+    
+}
+
+function getSourceFromUrl(url) {
+    if (!url) return 'Unknown';
+    if (url.includes('wikimedia.org') || url.includes('commons.wikimedia.org')) return 'Wikimedia Commons';
+    if (url.includes('nasa.gov') || url.includes('images-api.nasa.gov')) return 'NASA';
+    if (url.includes('loc.gov')) return 'Library of Congress';
+    if (url.includes('archive.org')) return 'Internet Archive';
+    if (url.includes('openverse')) return 'Openverse';
+    return 'Public Domain';
+}
+
+function populateObjectInfo() {
+    const objectInfoContent = document.getElementById('objectInfoContent');
+    if (!objectInfoContent) return;
+    
+    if (altarPieces.length === 0) {
+        objectInfoContent.innerHTML = '<p>NO OBJECTS ON SCREEN</p>';
+        return;
+    }
+    
+    let html = '';
+    altarPieces.forEach((piece, index) => {
+        const source = getSourceFromUrl(piece.originalUrl);
+        const dimensions = `${Math.round(piece.width)} × ${Math.round(piece.height)}px`;
+        const label = piece.label || `OBJECT ${index + 1}`;
+        
+        html += `<p>${label}. SOURCE: ${source}. DIMENSIONS: ${dimensions}.${piece.originalUrl ? ` PROVENANCE: <a href="${piece.originalUrl}" target="_blank">${piece.originalUrl}</a>` : ''}</p>`;
+    });
+    
+    objectInfoContent.innerHTML = html;
 }
 
 function handleZoom(e) {
@@ -1874,14 +1933,8 @@ function featherMask(mask, width, height, radius) {
 }
 
 function generatePieceLabel() {
-    const prefixes = ['SACRED', 'ANCIENT', 'HOLY', 'RITUAL', 'DIVINE', 'MYSTIC', 'ETERNAL'];
-    const suffixes = ['OBJECT', 'ARTIFACT', 'RELIC', 'SYMBOL', 'ICON', 'ELEMENT'];
-    
-    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-    const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
-    const number = Math.floor(Math.random() * 999) + 1;
-    
-    return `${prefix}-${suffix}-${number}`;
+    objectLabelCounter++;
+    return `ALTAR OBJECT ${objectLabelCounter}`;
 }
 
 function renderAltarPiece(piece) {
@@ -2412,6 +2465,7 @@ function clearCanvas() {
         deselectPiece();
         // Clear used image URLs when clearing canvas
         usedImageUrls.clear();
+        objectLabelCounter = 0;
         
         // Remove mantra text if it exists (check both body and canvas)
         const mantraText = document.getElementById('mantra-text');

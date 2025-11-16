@@ -88,6 +88,101 @@ body {
     text-decoration: underline;
 }
 
+.object-info-panel {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    align-items: left;
+    text-align: left;
+    padding: 30px 30px;
+    font-family: 'andale mono', monospace;
+    font-weight: 400;
+    font-size: clamp(10px, 1.5vw, 14px);
+    letter-spacing: 1.2px;
+    line-height: 1.05;
+    text-transform: uppercase;
+    color: #ffffff;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+    z-index: 5000;
+    overflow-y: auto;
+}
+
+.object-info-panel.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.object-info-content {
+    width: 100%;
+    max-width: 80%;
+}
+
+.object-info-content p {
+    margin-bottom: 12px;
+}
+
+.object-info-item {
+    margin-bottom: 12px;
+}
+
+.object-info-item__header {
+    margin-bottom: 12px;
+}
+
+.object-info-item__label {
+    font-weight: 400;
+    color: #ffffff;
+}
+
+.object-info-item__details {
+    display: block;
+}
+
+.object-info-item__detail {
+    margin-bottom: 12px;
+}
+
+.object-info-item__key {
+    color: #ffffff;
+}
+
+.object-info-item__value {
+    color: #ffffff;
+}
+
+.object-info-item__link {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+.object-info-content a {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+.object-info-panel__close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 18px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    font-family: 'andale mono', monospace;
+    text-transform: uppercase;
+}
+
+.object-info-panel__close:hover {
+    color: #d0d0d0;
+}
+
 .btn-text {
     background-color: transparent;
     border: none;
@@ -545,6 +640,17 @@ body {
     }
     
     .info-panel p {
+        max-width: 85%;
+    }
+    
+    .object-info-panel {
+        font-size: clamp(10px, 2.5vw, 14px);
+        padding: 80px 16px 24px 20px;
+        text-align: left;
+        align-items: flex-start;
+    }
+    
+    .object-info-content {
         max-width: 85%;
     }
     
